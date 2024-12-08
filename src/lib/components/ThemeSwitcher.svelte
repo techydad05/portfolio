@@ -1,119 +1,133 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { Palette, Sun, Moon } from 'lucide-svelte';
-    import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
-    import { currentTheme } from '$lib/stores/appStore';
+	import { onMount } from 'svelte';
+	import { Palette, Sun, Moon, ChevronDown } from 'lucide-svelte';
+	import { popup, type PopupSettings, LightSwitch, ProgressBar } from '@skeletonlabs/skeleton';
+	import { currentTheme } from '$lib/stores/appStore';
 
-    const themes = [
-        { name: 'Skeleton', value: 'skeleton', icon: '💀' },
-        { name: 'Modern', value: 'modern', icon: '🤖' },
-        { name: 'Rocket', value: 'rocket', icon: '🚀' },
-        { name: 'Seafoam', value: 'seafoam', icon: '🧜‍♀️' },
-        { name: 'Vintage', value: 'vintage', icon: '📺' },
-        { name: 'Sahara', value: 'sahara', icon: '🏜️' },
-        { name: 'Hamlindigo', value: 'hamlindigo', icon: '👔' },
-        { name: 'Gold Nouveau', value: 'gold-nouveau', icon: '💫' },
-        { name: 'Crimson', value: 'crimson', icon: '⭕' }
-    ];
+	export let inDrawer = false;
 
-    let isDark: boolean = false;
-    let popupSettings: PopupSettings = {
-        event: 'click',
-        target: 'themePopup',
-        placement: 'bottom-end'
-    };
+	const themes = [
+		{ type: 'skeleton', name: 'Skeleton', icon: '💀' },
+		{ type: 'wintry', name: 'Wintry', icon: '🌨️' },
+		{ type: 'modern', name: 'Modern', icon: '🤖' },
+		{ type: 'rocket', name: 'Rocket', icon: '🚀' },
+		{ type: 'seafoam', name: 'Seafoam', icon: '🧜‍♀️' },
+		{ type: 'vintage', name: 'Vintage', icon: '📺' },
+		{ type: 'sahara', name: 'Sahara', icon: '🏜️' },
+		{ type: 'hamlindigo', name: 'Hamlindigo', icon: '👔' },
+		{ type: 'gold-nouveau', name: 'Gold Nouveau', icon: '💫' },
+		{ type: 'crimson', name: 'Crimson', icon: '⭕' },
+		{ type: 'seasonal', name: 'Seasonal', icon: '🎆' },
+		{ type: 'test', name: 'Test', icon: '🚧' }
+	];
 
-    function setTheme(theme: string) {
-        $currentTheme = theme;
-        const mode = isDark ? 'dark' : 'light';
-        document.body.setAttribute('data-theme', theme);
-        document.documentElement.classList.toggle('dark', isDark);
-        localStorage.setItem('theme', theme);
-        localStorage.setItem('mode', mode);
-    }
+	let isDark: boolean = false;
+	let popupSettings: PopupSettings = {
+		event: 'click',
+		target: inDrawer ? 'drawerThemePopup' : 'themePopup',
+		placement: inDrawer ? 'bottom-start' : 'bottom-end'
+	};
 
-    function toggleMode() {
-        isDark = !isDark;
-        setTheme($currentTheme);
-    }
+	function setTheme(theme: string) {
+		console.log(theme);
+		$currentTheme = theme;
+		const mode = isDark ? 'dark' : 'light';
+		document.body.setAttribute('data-theme', theme);
+		document.documentElement.classList.toggle('dark', isDark);
+		localStorage.setItem('theme', theme);
+		localStorage.setItem('mode', mode);
 
-    onMount(() => {
-        const savedTheme = localStorage.getItem('theme');
-        const savedMode = localStorage.getItem('mode');
-        if (savedTheme) {
-            $currentTheme = savedTheme;
-        }
-        if (savedMode) {
-            isDark = savedMode === 'dark';
-        } else {
-            isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-        setTheme($currentTheme);
-    });
+		// Close the popup after theme selection
+		// const popupId = inDrawer ? 'drawerThemePopup' : 'themePopup';
+		// const popup = document.querySelector(`[data-popup="${popupId}"]`);
+		// if (popup) {
+		// 	popup.classList.remove('show');
+		// }
+	}
+
+	function toggleMode() {
+		isDark = !isDark;
+		setTheme($currentTheme);
+	}
+
+	onMount(() => {
+		const savedTheme = localStorage.getItem('theme');
+		const savedMode = localStorage.getItem('mode');
+		if (savedTheme) {
+			$currentTheme = savedTheme;
+		}
+		if (savedMode) {
+			isDark = savedMode === 'dark';
+		} else {
+			isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		}
+		setTheme($currentTheme);
+	});
 </script>
 
-<div class="relative flex items-center gap-4">
-    <!-- Light/Dark Mode Toggle -->
-    <button
-        class="btn variant-soft hover:variant-filled-primary"
-        on:click={toggleMode}
-        title="Toggle {isDark ? 'Light' : 'Dark'} Mode"
-    >
-        <svelte:component this={isDark ? Sun : Moon} class="w-4 h-4" />
-    </button>
-
-    <!-- Theme Selector -->
-    <div class="relative">
-        <button
-            class="btn variant-soft hover:variant-filled-primary flex items-center gap-2"
-            use:popup={popupSettings}
-        >
-            <svelte:component this={Palette} class="w-4 h-4" />
-            <span class="hidden md:inline">Theme</span>
-        </button>
-
-        <!-- Popup -->
-        <div
-            class="card variant-filled-surface p-4 shadow-xl"
-            data-popup="themePopup"
-        >
-            <div class="grid grid-cols-1 gap-2 w-48">
-                {#each themes as theme}
-                    <button
-                        class="btn variant-soft w-full text-left flex items-center gap-2"
-                        class:variant-filled-primary={$currentTheme === theme.value}
-                        on:click={() => {
-                            setTheme(theme.value);
-                            const popup = document.querySelector('[data-popup="themePopup"]');
-                            if (popup) {
-                                popup.classList.remove('show');
-                            }
-                        }}
-                    >
-                        <span class="w-6">{theme.icon}</span>
-                        <span>{theme.name}</span>
-                    </button>
-                {/each}
-            </div>
-            <!-- Arrow -->
-            <div class="arrow bg-surface-100-800-token" />
-        </div>
-    </div>
+<!-- Theme -->
+<div>
+	<!-- trigger -->
+	<button class="btn hover:variant-soft-primary" use:popup={popupSettings}>
+		<svelte:component this={Palette} class="h-4 w-4" />
+		<span>Theme</span>
+		<svelte:component this={ChevronDown} class="h-4 w-4" />
+	</button>
+	<!-- popup -->
+	<div class="card w-60 p-4 shadow-xl" data-popup={inDrawer ? 'drawerThemePopup' : 'themePopup'}>
+		<div class="space-y-4">
+			<section class="flex items-center justify-between">
+				<h6 class="h6">Mode</h6>
+				<LightSwitch />
+			</section>
+			<hr />
+			<nav class="list-nav -m-4 max-h-64 overflow-y-auto p-4 lg:max-h-[500px]">
+				<ul>
+					<!-- , badge -->
+					{#each themes as { icon, name, type }}
+						<li>
+							<button
+								class="option h-full w-full"
+								type="submit"
+								name="theme"
+								value={type}
+								class:bg-primary-active-token={$currentTheme === type}
+								on:click={() => setTheme(type)}
+							>
+								<span>{icon}</span>
+								<span class="flex-auto text-left">{name}</span>
+								<!-- {#if badge}<span class="badge variant-filled-secondary">{badge}</span>{/if} -->
+							</button>
+						</li>
+					{/each}
+				</ul>
+			</nav>
+			<hr />
+			<div>
+				<a class="btn variant-filled w-full" href="/docs/generator">
+					<i class="fa-solid fa-palette"></i>
+					<span>Create a Theme</span>
+				</a>
+			</div>
+		</div>
+		<!-- <div class="arrow bg-surface-100-800-token" /> -->
+	</div>
 </div>
 
 <style>
-    [data-popup="themePopup"] {
-        position: absolute;
-        z-index: 50;
-    }
-    .arrow {
-        position: absolute;
-        width: 0;
-        height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-bottom: 8px solid var(--color-surface-500);
-        top: -8px;
-        right: 18px;
-    }
+	[data-popup='themePopup'],
+	[data-popup='drawerThemePopup'] {
+		position: absolute;
+		z-index: 50;
+	}
+	.arrow {
+		position: absolute;
+		width: 0;
+		height: 0;
+		border-left: 8px solid transparent;
+		border-right: 8px solid transparent;
+		border-bottom: 8px solid var(--color-surface-500);
+		top: -8px;
+		right: 18px;
+	}
 </style>

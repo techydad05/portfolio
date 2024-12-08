@@ -1,4 +1,3 @@
-
 // @ts-check
 import { join } from 'path';
 
@@ -14,35 +13,19 @@ export default {
 	darkMode: 'class',
 	content: [
 		'./src/**/*.{html,js,svelte,ts}',
-		// 3. Append the path to the Skeleton package
-		join(require.resolve(
-			'@skeletonlabs/skeleton'),
-			'../**/*.{html,js,svelte,ts}'
-		)
+		// 3. Append the path for the Skeleton package
+		'./node_modules/@skeletonlabs/skeleton/**/*.{html,js,svelte,ts}'
 	],
 	theme: {
 		extend: {},
 	},
 	plugins: [
-		typography, forms, containerQueries,
-		// 4. Append the Skeleton plugin (after other plugins)
+		forms,
+		typography,
+		containerQueries,
+		// 4. Append the Skeleton plugin
 		skeleton({
-			themes: { preset: [ "skeleton", "modern", "crimson", "gold-nouveau", "hamlindigo", "vintage", "seafoam", "rocket" ] }
+			themes: { preset: ["skeleton", "modern", "crimson", "gold-nouveau", "hamlindigo", "vintage", "seafoam", "rocket", "wintry", "sahara"] }
 		})
 	]
 }
-						
-
-
-
-
-// /** @type {import('tailwindcss').Config} */
-// export default {
-// 	content: ['./src/**/*.{html,js,svelte,ts}'],
-
-// 	theme: {
-// 		extend: {}
-// 	},
-
-// 	plugins: [typography, forms, containerQueries]
-// };
